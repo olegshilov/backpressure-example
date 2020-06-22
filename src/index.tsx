@@ -1,12 +1,30 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import { App } from './App';
 import * as serviceWorker from './serviceWorker';
+import { reducer } from './reducer';
+import createSagaMiddleware from 'redux-saga';
+import { createEpicMiddleware } from 'redux-observable';
+import { saga } from './saga';
+import { epic } from './epic';
+
+const epicMiddleware = createEpicMiddleware();
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  reducer,
+  applyMiddleware(epicMiddleware, sagaMiddleware)
+);
+
+epicMiddleware.run(epic);
+sagaMiddleware.run(saga);
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );
