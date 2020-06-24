@@ -1,6 +1,5 @@
 import { ofType } from 'redux-observable';
 import { switchMap, map, tap, delay } from 'rxjs/operators';
-import { createIteratorSubject } from './createIteratorSubject';
 import { BehaviorSubject } from 'rxjs';
 
 export class IteratorBehaviorSubject<T> extends BehaviorSubject<T> {
