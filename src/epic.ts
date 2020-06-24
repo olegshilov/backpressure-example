@@ -2,14 +2,15 @@ import { ofType } from 'redux-observable';
 import { switchMap, map, tap, delay } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
-export class IteratorBehaviorSubject<T> extends BehaviorSubject<T> {
-  constructor(private iterator: any, value: T) {
-    super(value);
+export class IteratorBehaviorSubject<T> extends BehaviorSubject<T | undefined> {
+  constructor(private iterator: any) {
+    super(undefined);
 
     this.iterator = iterator;
+    this.push(undefined);
   }
 
-  async push(pushValue: T): Promise<void> {
+  public push = async (pushValue: T | undefined): Promise<void> => {
     const { done, value } = await this.iterator.next(pushValue);
 
     if (done && value === undefined) {
@@ -17,10 +18,10 @@ export class IteratorBehaviorSubject<T> extends BehaviorSubject<T> {
     } else {
       this.next(await value);
     }
-  }
+  };
 }
 
-export async function* asyncGenerator() {
+async function* asyncGenerator() {
   for (let i = 0; i <= 10; i++) {
     yield new Promise((resolve) => {
       setTimeout(() => {
@@ -30,7 +31,7 @@ export async function* asyncGenerator() {
   }
 }
 
-const iterator$ = new IteratorBehaviorSubject(asyncGenerator, undefined);
+const iterator$ = new IteratorBehaviorSubject(asyncGenerator());
 
 export function epic(action$: any): any {
   return action$.pipe(
