@@ -1,10 +1,12 @@
-import { put, call, takeLatest, delay } from 'redux-saga/effects';
+import { put, call, takeLatest } from 'redux-saga/effects';
+import { wait } from './wait';
 
 let i = 0;
 function requestPromise() {
   return new Promise((resolve) => {
     setTimeout(() => {
       if (i <= 10) {
+        console.log(`requestPromise promise ${i} resolved`);
         resolve(i);
         i++;
       } else {
@@ -24,7 +26,7 @@ function* requestPoint() {
         shouldContinue = false;
       } else {
         console.log('SAGA: INCOMING VALUE', value);
-        yield delay(1000); // Some hard calculations here
+        yield call(() => wait(1000)); // Some hard calculations here
         console.log('SAGA: DONE PROCESSING VALUE', value);
         yield put({
           type: 'PUT_SAGA',

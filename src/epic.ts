@@ -1,6 +1,7 @@
 import { ofType } from 'redux-observable';
-import { switchMap, map, tap, delay } from 'rxjs/operators';
+import { switchMap, map, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
+import { wait } from './wait';
 
 export class IteratorBehaviorSubject<T> extends BehaviorSubject<T | undefined> {
   constructor(private iterator: any) {
@@ -16,7 +17,7 @@ export class IteratorBehaviorSubject<T> extends BehaviorSubject<T | undefined> {
     if (done && value === undefined) {
       this.complete();
     } else {
-      this.next(await value);
+      await this.next(value);
     }
   };
 }
@@ -25,6 +26,7 @@ async function* asyncGenerator() {
   for (let i = 0; i <= 10; i++) {
     yield new Promise((resolve) => {
       setTimeout(() => {
+        console.log(`asyncGenerator promise ${i} resolved`);
         resolve(i);
       }, 1000);
     });
@@ -39,7 +41,7 @@ export function epic(action$: any): any {
     switchMap(() => {
       return iterator$.pipe(
         tap((value) => console.log('EPIC: INCOMING VALUE', value)),
-        delay(1000), // Some hard calculations here
+        tap(() => wait(1000)), // Some hard calculations here
         tap((value) => console.log('EPIC: DONE PROCESSING VALUE', value)),
         tap({
           next: iterator$.push,
